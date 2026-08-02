@@ -1,0 +1,22 @@
+# Maven
+target/
+*.class
+*.jar
+
+# IDE (IntelliJ IDEA)
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Env / secrets
+.env
+*.local
+
+# Docker
+docker-compose.override.yml
