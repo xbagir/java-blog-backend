@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @SpringJUnitConfig(classes = {DataConfig.class, PostServiceImpl.class, CommentServiceImpl.class,
-        ImageServiceImpl.class, PostFeedRepository.class})
+        ImageServiceImpl.class, PostFeedRepository.class, PostTagRepository.class,
+        PostLikesRepository.class, PostImageRepository.class})
 @TestPropertySource(locations = "classpath:test-application.properties")
 @Sql(scripts = {"classpath:schema-h2.sql", "classpath:data-h2.sql"},
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)

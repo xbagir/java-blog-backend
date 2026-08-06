@@ -2,7 +2,7 @@ package com.blog.service;
 
 import com.blog.dto.PostImage;
 import com.blog.exception.ResourceNotFoundException;
-import com.blog.repository.PostFeedRepository;
+import com.blog.repository.PostImageRepository;
 import com.blog.repository.PostRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ class ImageServiceTest {
     private PostRepository postRepository;
 
     @Mock
-    private PostFeedRepository postFeedRepository;
+    private PostImageRepository postImageRepository;
 
     @InjectMocks
     private ImageServiceImpl imageService;
@@ -33,12 +33,12 @@ class ImageServiceTest {
 
         imageService.updateImage(1L, new byte[]{1, 2, 3}, "image/png");
 
-        verify(postFeedRepository).updateImage(1L, new byte[]{1, 2, 3}, "image/png");
+        verify(postImageRepository).updateImage(1L, new byte[]{1, 2, 3}, "image/png");
     }
 
     @Test
     void getImageReturnsStoredImage() {
-        when(postFeedRepository.findImage(1L)).thenReturn(new PostImage(new byte[]{1, 2, 3}, "image/png"));
+        when(postImageRepository.findImage(1L)).thenReturn(new PostImage(new byte[]{1, 2, 3}, "image/png"));
 
         PostImage image = imageService.getImage(1L);
 
@@ -48,7 +48,7 @@ class ImageServiceTest {
 
     @Test
     void getImageWithoutBytesThrowsNotFound() {
-        when(postFeedRepository.findImage(1L)).thenReturn(new PostImage(null, null));
+        when(postImageRepository.findImage(1L)).thenReturn(new PostImage(null, null));
 
         assertThatThrownBy(() -> imageService.getImage(1L)).isInstanceOf(ResourceNotFoundException.class);
     }

@@ -6,8 +6,11 @@ import com.blog.dto.PostResponse;
 import com.blog.dto.PostUpdateRequest;
 import com.blog.exception.ResourceNotFoundException;
 import com.blog.model.Post;
+import com.blog.repository.CommentRepository;
 import com.blog.repository.PostFeedRepository;
+import com.blog.repository.PostLikesRepository;
 import com.blog.repository.PostRepository;
+import com.blog.repository.PostTagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +39,15 @@ class PostServiceTest {
 
     @Mock
     private PostFeedRepository postFeedRepository;
+
+    @Mock
+    private PostTagRepository postTagRepository;
+
+    @Mock
+    private PostLikesRepository postLikesRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     @InjectMocks
     private PostServiceImpl postService;
@@ -183,8 +195,8 @@ class PostServiceTest {
     void getPostReturnsFullTextWithTagsAndCounters() {
         Post post = Post.builder().id(5L).title("Заголовок").text("Очень длинный текст поста").likesCount(3).build();
         when(postRepository.findById(5L)).thenReturn(Optional.of(post));
-        when(postFeedRepository.findTags(5L)).thenReturn(List.of("a", "b"));
-        when(postFeedRepository.countComments(5L)).thenReturn(2L);
+        when(postTagRepository.findTags(5L)).thenReturn(List.of("a", "b"));
+        when(commentRepository.countByPostId(5L)).thenReturn(2L);
 
         PostResponse response = postService.getPost(5L);
 
@@ -216,7 +228,7 @@ class PostServiceTest {
         assertThat(response.tags()).containsExactly("a", "b");
         assertThat(response.likesCount()).isZero();
         assertThat(response.commentsCount()).isZero();
-        verify(postFeedRepository).replaceTags(10L, List.of("a", "b"));
+        verify(postTagRepository).replaceTags(10L, List.of("a", "b"));
     }
 
     @Test
@@ -239,8 +251,8 @@ class PostServiceTest {
         Post existing = Post.builder().id(5L).title("Старое").text("Старый текст").likesCount(7).build();
         when(postRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(postFeedRepository.findTags(5L)).thenReturn(List.of("x"));
-        when(postFeedRepository.countComments(5L)).thenReturn(4L);
+        when(postTagRepository.findTags(5L)).thenReturn(List.of("x"));
+        when(commentRepository.countByPostId(5L)).thenReturn(4L);
 
         PostResponse response = postService.updatePost(5L, new PostUpdateRequest(5L, "Новое", "Новый текст", List.of("x")));
 
@@ -248,7 +260,7 @@ class PostServiceTest {
         assertThat(response.text()).isEqualTo("Новый текст");
         assertThat(response.likesCount()).isEqualTo(7);
         assertThat(response.commentsCount()).isEqualTo(4);
-        verify(postFeedRepository).replaceTags(5L, List.of("x"));
+        verify(postTagRepository).replaceTags(5L, List.of("x"));
     }
 
     @Test
@@ -278,7 +290,7 @@ class PostServiceTest {
     @Test
     void likePostReturnsIncrementedCount() {
         when(postRepository.existsById(1L)).thenReturn(true);
-        when(postFeedRepository.incrementLikes(1L)).thenReturn(6L);
+        when(postLikesRepository.incrementLikes(1L)).thenReturn(6L);
 
         assertThat(postService.likePost(1L)).isEqualTo(6L);
     }
@@ -288,6 +300,6 @@ class PostServiceTest {
         when(postRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> postService.likePost(1L)).isInstanceOf(ResourceNotFoundException.class);
-        verify(postFeedRepository, never()).incrementLikes(anyLong());
+        verify(postLikesRepository, never()).incrementLikes(anyLong());
     }
 }

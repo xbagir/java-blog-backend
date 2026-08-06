@@ -2,7 +2,7 @@ package com.blog.service;
 
 import com.blog.dto.PostImage;
 import com.blog.exception.ResourceNotFoundException;
-import com.blog.repository.PostFeedRepository;
+import com.blog.repository.PostImageRepository;
 import com.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,23 +11,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ImageServiceImpl extends AbstractPostService implements ImageService {
 
-    private final PostFeedRepository postFeedRepository;
+    private final PostImageRepository postImageRepository;
 
-    public ImageServiceImpl(PostRepository postRepository, PostFeedRepository postFeedRepository) {
+    public ImageServiceImpl(PostRepository postRepository, PostImageRepository postImageRepository) {
         super(postRepository);
-        this.postFeedRepository = postFeedRepository;
+        this.postImageRepository = postImageRepository;
     }
 
     @Override
     @Transactional
     public void updateImage(long id, byte[] image, String contentType) {
         requirePostExists(id);
-        postFeedRepository.updateImage(id, image, contentType);
+        postImageRepository.updateImage(id, image, contentType);
     }
 
     @Override
     public PostImage getImage(long id) {
-        PostImage image = postFeedRepository.findImage(id);
+        PostImage image = postImageRepository.findImage(id);
         if (image == null || image.data() == null) {
             throw new ResourceNotFoundException("Image not found: " + id);
         }

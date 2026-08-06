@@ -6,8 +6,11 @@ import com.blog.dto.PostResponse;
 import com.blog.dto.PostUpdateRequest;
 import com.blog.exception.ResourceNotFoundException;
 import com.blog.model.Post;
+import com.blog.repository.CommentRepository;
 import com.blog.repository.PostFeedRepository;
+import com.blog.repository.PostLikesRepository;
 import com.blog.repository.PostRepository;
+import com.blog.repository.PostTagRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +24,20 @@ public class PostServiceImpl extends AbstractPostService implements PostService 
     private static final String ELLIPSIS = "\u2026";
 
     private final PostFeedRepository postFeedRepository;
+    private final PostTagRepository postTagRepository;
+    private final PostLikesRepository postLikesRepository;
+    private final CommentRepository commentRepository;
 
-    public PostServiceImpl(PostRepository postRepository, PostFeedRepository postFeedRepository) {
+    public PostServiceImpl(PostRepository postRepository,
+                           PostFeedRepository postFeedRepository,
+                           PostTagRepository postTagRepository,
+                           PostLikesRepository postLikesRepository,
+                           CommentRepository commentRepository) {
         super(postRepository);
         this.postFeedRepository = postFeedRepository;
+        this.postTagRepository = postTagRepository;
+        this.postLikesRepository = postLikesRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -66,7 +79,7 @@ public class PostServiceImpl extends AbstractPostService implements PostService 
                 .likesCount(0)
                 .build();
         Post saved = postRepository.save(post);
-        postFeedRepository.replaceTags(saved.getId(), request.tags());
+        postTagRepository.replaceTags(saved.getId(), request.tags());
 
         return new PostResponse(saved.getId(), saved.getTitle(), saved.getText(), request.tags(), 0, 0);
     }
@@ -83,7 +96,7 @@ public class PostServiceImpl extends AbstractPostService implements PostService 
         post.setTitle(request.title().trim());
         post.setText(request.text());
         Post saved = postRepository.save(post);
-        postFeedRepository.replaceTags(saved.getId(), request.tags());
+        postTagRepository.replaceTags(saved.getId(), request.tags());
 
         return toPostResponse(saved);
     }
@@ -99,7 +112,7 @@ public class PostServiceImpl extends AbstractPostService implements PostService 
     @Transactional
     public long likePost(long id) {
         requirePostExists(id);
-        return postFeedRepository.incrementLikes(id);
+        return postLikesRepository.incrementLikes(id);
     }
 
     private Post findPost(long id) {
@@ -112,9 +125,9 @@ public class PostServiceImpl extends AbstractPostService implements PostService 
                 post.getId(),
                 post.getTitle(),
                 post.getText(),
-                postFeedRepository.findTags(post.getId()),
+                postTagRepository.findTags(post.getId()),
                 post.getLikesCount(),
-                postFeedRepository.countComments(post.getId()));
+                commentRepository.countByPostId(post.getId()));
     }
 
     private void validatePostRequest(String title, String text, List<String> tags) {
