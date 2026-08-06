@@ -147,6 +147,20 @@ class PostControllerTest {
     }
 
     @Test
+    void unknownPathReturns404Json() throws Exception {
+        MockMvc strictMvc = MockMvcBuilders.webAppContextSetup(context)
+                .addDispatcherServletCustomizer(
+                        dispatcherServlet -> dispatcherServlet.setThrowExceptionIfNoHandlerFound(true))
+                .build();
+
+        strictMvc.perform(get("/api/nonexistent"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("404"))
+                .andExpect(jsonPath("$.error").value(containsString("No handler found")));
+    }
+
+    @Test
     void createPostAcceptsJsonAndReturnsPost() throws Exception {
         when(postService.createPost(any(PostRequest.class)))
                 .thenReturn(new PostResponse(3L, "Название поста 3", "Текст поста 3", List.of("tag_1", "tag_2"), 0, 0));
