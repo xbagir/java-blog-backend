@@ -25,7 +25,9 @@ public class PostFeedRepository {
             FROM posts p
             WHERE (:search = ''
                    OR LOWER(p.title) LIKE :pattern ESCAPE '\\'
-                   OR LOWER(p.text) LIKE :pattern ESCAPE '\\')
+                   OR LOWER(p.text) LIKE :pattern ESCAPE '\\'
+                   OR EXISTS (SELECT 1 FROM post_tags t
+                              WHERE t.post_id = p.id AND LOWER(t.tag) LIKE :pattern ESCAPE '\\'))
             ORDER BY p.created_at DESC, p.id DESC
             LIMIT :limit OFFSET :offset
             """;
@@ -42,7 +44,9 @@ public class PostFeedRepository {
             FROM posts p
             WHERE (:search = ''
                    OR LOWER(p.title) LIKE :pattern ESCAPE '\\'
-                   OR LOWER(p.text) LIKE :pattern ESCAPE '\\')
+                   OR LOWER(p.text) LIKE :pattern ESCAPE '\\'
+                   OR EXISTS (SELECT 1 FROM post_tags t
+                              WHERE t.post_id = p.id AND LOWER(t.tag) LIKE :pattern ESCAPE '\\'))
             """;
 
     private static final String SELECT_TAGS_BY_POST_SQL = """

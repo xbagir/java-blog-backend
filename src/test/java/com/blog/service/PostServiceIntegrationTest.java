@@ -79,6 +79,25 @@ class PostServiceIntegrationTest {
     }
 
     @Test
+    void searchFiltersPostsByTag() {
+        FeedResponse feed = postService.getFeed("tag3", 1, 5);
+
+        assertThat(feed.posts()).hasSize(1);
+        assertThat(feed.posts().get(0).id()).isEqualTo(3);
+        assertThat(feed.posts().get(0).tags()).containsExactly("tag3");
+    }
+
+    @Test
+    void searchByTagRespectsPagination() {
+        FeedResponse feed = postService.getFeed("tag", 1, 1);
+
+        assertThat(feed.posts()).hasSize(1);
+        assertThat(feed.posts().get(0).id()).isEqualTo(3);
+        assertThat(feed.lastPage()).isEqualTo(2);
+        assertThat(feed.hasNext()).isTrue();
+    }
+
+    @Test
     void longTextIsTruncatedWithEllipsis() {
         FeedResponse feed = postService.getFeed("", 1, 5);
 

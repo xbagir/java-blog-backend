@@ -73,9 +73,26 @@ class PostFeedRepositoryIntegrationTest {
     }
 
     @Test
+    void searchMatchesTagsCaseInsensitively() {
+        assertThat(postFeedRepository.countPosts("tag3")).isEqualTo(1);
+        assertThat(postFeedRepository.countPosts("TAG3")).isEqualTo(1);
+
+        List<PostResponse> posts = postFeedRepository.findPosts("tag3", 5, 0);
+        assertThat(posts).extracting(PostResponse::id).containsExactly(3L);
+        assertThat(posts.get(0).tags()).containsExactly("tag3");
+    }
+
+    @Test
+    void searchMatchesTagsWithLimitAndOffset() {
+        List<PostResponse> page = postFeedRepository.findPosts("tag", 1, 1);
+        assertThat(page).extracting(PostResponse::id).containsExactly(1L);
+    }
+
+    @Test
     void searchEscapesLikeWildcards() {
         assertThat(postFeedRepository.countPosts("%")).isZero();
         assertThat(postFeedRepository.countPosts("_")).isZero();
         assertThat(postFeedRepository.countPosts("\\")).isZero();
+        assertThat(postFeedRepository.countPosts("tag_")).isZero();
     }
 }
