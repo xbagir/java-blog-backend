@@ -7,9 +7,7 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B package
 
-FROM eclipse-temurin:21-jre
-WORKDIR /app
-COPY --from=build /app/target/blog-backend.jar app.jar
-COPY --from=build /app/target/lib ./lib
+FROM tomcat:10.1-jre21
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+COPY --from=build /app/target/blog-backend.war /usr/local/tomcat/webapps/ROOT.war
 EXPOSE 8080
-CMD ["java", "-cp", "app.jar:lib/*", "com.blog.BlogApplication"]

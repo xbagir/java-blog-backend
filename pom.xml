@@ -7,7 +7,7 @@
     <groupId>com.blog</groupId>
     <artifactId>blog-backend</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 
     <name>blog-backend</name>
     <description>Backend REST API for a blog platform: post feed, post/comment CRUD, likes and images.</description>
@@ -18,12 +18,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>6.1.14</spring.version>
         <spring-data-jdbc.version>3.3.5</spring-data-jdbc.version>
-        <tomcat.version>10.1.28</tomcat.version>
         <jackson.version>2.17.2</jackson.version>
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.12.0</mockito.version>
         <lombok.version>1.18.34</lombok.version>
         <h2.version>2.2.224</h2.version>
+        <servlet-api.version>6.0.0</servlet-api.version>
+        <annotation-api.version>2.1.1</annotation-api.version>
     </properties>
 
     <dependencies>
@@ -55,11 +56,20 @@
             <version>${spring-data-jdbc.version}</version>
         </dependency>
 
-        <!-- Embedded Tomcat (servlet container) -->
+        <!-- Servlet API (provided by the servlet container at runtime) -->
         <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat.version}</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${servlet-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Jakarta annotations (@PostConstruct) — provided by the servlet container at runtime -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${annotation-api.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Jackson for JSON serialization -->
@@ -199,21 +209,8 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <includeScope>runtime</includeScope>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
             </plugin>
         </plugins>
     </build>

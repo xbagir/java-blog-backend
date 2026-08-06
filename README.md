@@ -7,7 +7,7 @@
 - Java 21, Maven
 - Spring Framework (Core/Context, Web MVC, JDBC) — без Spring Boot
 - Spring Data JDBC
-- Tomcat 10.1 (embedded, внутри Docker-образа)
+- Tomcat 10.1 (Servlet 6.0) — сервлет-контейнер
 - PostgreSQL 16
 - JUnit 5, Spring Test, Mockito
 
@@ -24,7 +24,7 @@
 mvn -B clean package
 ```
 
-Результат: `target/blog-backend.jar` + `target/lib/` (используются при сборке образа).
+Результат: `target/blog-backend.war` — WAR-артефакт для деплоя в сервлет-контейнер (Tomcat 10.1).
 
 Через Docker:
 
@@ -44,11 +44,27 @@ mvn -B test
 
 ## Деплой в сервлет-контейнер
 
-Приложение поставляется как исполняемый jar с embedded Tomcat (сервлет-контейнер) и разворачивается в Docker-образе. Деплой = запуск образа через docker-compose:
+Приложение поставляется как WAR-артефакт и разворачивается в сервлет-контейнере Tomcat 10.1 (Servlet 6.0).
+
+Деплой через Docker (Tomcat в отдельном образе):
 
 ```bash
 docker compose up --build
 ```
+
+Ручной деплой во внешний Tomcat:
+
+```bash
+cp target/blog-backend.war <TOMCAT_HOME>/webapps/
+```
+
+Быстрая проверка WAR во временном Tomcat без установки:
+
+```bash
+docker run -p 8082:8080 -v "$PWD/target/blog-backend.war:/usr/local/tomcat/webapps/ROOT.war" tomcat:10.1-jre21
+```
+
+WAR разворачивается на корневом контексте (`/`), поэтому API доступен без префикса приложения.
 
 Параметры окружения сервиса `app`:
 
@@ -57,7 +73,6 @@ docker compose up --build
 | `DB_URL` | JDBC-URL PostgreSQL | `jdbc:postgresql://localhost:5432/blogdb` |
 | `DB_USER` | Пользователь БД | `blog` |
 | `DB_PASSWORD` | Пароль БД | `blog` |
-| `PORT` | Порт приложения | `8080` |
 | `SEED_DATABASE` | Сидировать демо-данные при старте | `true` |
 
 ## Запуск и использование
