@@ -2,6 +2,10 @@
 target/
 *.class
 *.jar
+# Gradle (keep the wrapper jar so it can bootstrap the build)
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/
+build/
 
 # IDE (IntelliJ IDEA)
 .idea/
