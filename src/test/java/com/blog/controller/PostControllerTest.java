@@ -36,7 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PostController.class)
+@WebMvcTest(controllers = PostController.class,
+        properties = {"spring.mvc.throw-exception-if-no-handler-found=true",
+                "spring.web.resources.add-mappings=false"})
 class PostControllerTest {
 
     @Autowired

@@ -1,4 +1,4 @@
--- Demo data. Seeded only when the posts table is empty (see DataConfig).
+-- Demo data. Seeded only when the posts table is empty (see DatabaseSeeder).
 INSERT INTO posts (id, title, text, likes_count, created_at) VALUES
     (1, 'The Witcher 3: Wild Hunt', 'Открытый мир в жанре RPG: роль **Геральта из Ривии**, охота на чудовищ и нелинейный сюжет. Lalala, одна из лучших RPG за всю историю.', 2, now() - interval '25 days'),
     (2, 'Cyberpunk 2077', 'Мрачный *Найт-Сити* и история наёмника Ви. Открытый мир, кибер-импланты и глубокие диалоги в духе киберпанка.', 3, now() - interval '24 days'),
