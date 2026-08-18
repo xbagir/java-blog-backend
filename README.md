@@ -4,78 +4,37 @@
 
 ## Стек
 
-- Java 21, Maven
-- Spring Framework (Core/Context, Web MVC, JDBC) — без Spring Boot
+- Java 21
+- Spring Boot 3.5 (Web MVC, Data JDBC) — встроенный сервлет-контейнер Tomcat
 - Spring Data JDBC
-- Tomcat 10.1 (Servlet 6.0) — сервлет-контейнер
+- Gradle 8.14 (wrapper в репозитории)
 - PostgreSQL 16
-- JUnit 5, Spring Test, Mockito
+- JUnit 5, Spring Boot Test (`@WebMvcTest`, `@DataJdbcTest`), H2 (в PostgreSQL-режиме), Mockito
 
 ## Требования
 
-- JDK 21 и Maven 3.9+ — для сборки бэкенда и запуска тестов.
+- JDK 21 и Gradle 8.14 (или воспользоваться `./gradlew`) — для сборки и тестов.
 - Docker с Compose v2 — для запуска приложения.
 
 ## Сборка бэкенда
 
-Через Maven:
+Через Gradle wrapper:
 
 ```bash
-mvn -B clean package
+./gradlew build
 ```
 
-Результат: `target/blog-backend.war` — WAR-артефакт для деплоя в сервлет-контейнер (Tomcat 10.1).
+Результат: `build/libs/blog-backend.jar` — исполняемый (executable) JAR со встроенным сервлет-контейнером.
 
-Через Docker:
+Только тесты без упаковки:
 
 ```bash
-docker build -t blog-backend .
+./gradlew test
 ```
 
-Тесты запускаются автоматически на этапе сборки образа.
+## Запуск бэкенда
 
-## Запуск тестов
-
-```bash
-mvn -B test
-```
-
-При сборке образа Docker тесты также выполняются в build-стадии.
-
-## Деплой в сервлет-контейнер
-
-Приложение поставляется как WAR-артефакт и разворачивается в сервлет-контейнере Tomcat 10.1 (Servlet 6.0).
-
-Деплой через Docker (Tomcat в отдельном образе):
-
-```bash
-docker compose up --build
-```
-
-Ручной деплой во внешний Tomcat:
-
-```bash
-cp target/blog-backend.war <TOMCAT_HOME>/webapps/
-```
-
-Быстрая проверка WAR во временном Tomcat без установки:
-
-```bash
-docker run -p 8082:8080 -v "$PWD/target/blog-backend.war:/usr/local/tomcat/webapps/ROOT.war" tomcat:10.1-jre21
-```
-
-WAR разворачивается на корневом контексте (`/`), поэтому API доступен без префикса приложения.
-
-Параметры окружения сервиса `app`:
-
-| Переменная | Назначение | По умолчанию |
-|------------|------------|--------------|
-| `DB_URL` | JDBC-URL PostgreSQL | `jdbc:postgresql://localhost:5432/blogdb` |
-| `DB_USER` | Пользователь БД | `blog` |
-| `DB_PASSWORD` | Пароль БД | `blog` |
-| `SEED_DATABASE` | Сидировать демо-данные при старте | `true` |
-
-## Запуск и использование
+### Docker Compose (рекомендуется)
 
 ```bash
 docker compose up --build
@@ -83,7 +42,32 @@ docker compose up --build
 
 - Приложение: http://localhost:8082
 - База данных PostgreSQL: `localhost:5432`, пользователь `blog`, пароль `blog`, БД `blogdb`
-- При первом старте создаётся схема, и БД наполняется 10 демо-постами
+- При первом старте создаётся схема, и БД наполняется 10 демо-постами (управляется `SEED_DATABASE`)
+- Тесты выполняются на этапе сборки образа
+
+### Локально
+
+```bash
+./gradlew bootRun
+```
+
+или через собранный JAR (нужна доступная PostgreSQL):
+
+```bash
+java -jar build/libs/blog-backend.jar
+```
+
+Параметры окружения (переопределяют значения из `application.properties`):
+
+| Переменная | Назначение | По умолчанию |
+|------------|------------|--------------|
+| `SPRING_DATASOURCE_URL` | JDBC-URL PostgreSQL | `jdbc:postgresql://localhost:5432/blogdb` |
+| `SPRING_DATASOURCE_USERNAME` | Пользователь БД | `blog` |
+| `SPRING_DATASOURCE_PASSWORD` | Пароль БД | `blog` |
+| `SEED_DATABASE` | Применять схему и сидировать демо-данные при старте | `true` |
+| `PORT` | Порт HTTP-сервера | `8080` |
+
+## Использование
 
 Примеры запросов:
 

@@ -1,16 +1,14 @@
 package com.blog.repository;
 
-import com.blog.config.DataConfig;
 import com.blog.service.CommentServiceImpl;
 import com.blog.service.ImageServiceImpl;
 import com.blog.service.PostServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,11 +16,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@SpringJUnitConfig(classes = {DataConfig.class, PostServiceImpl.class, CommentServiceImpl.class,
-        ImageServiceImpl.class, PostFeedRepository.class, PostTagRepository.class,
-        PostLikesRepository.class, PostImageRepository.class})
-@TestPropertySource(locations = "classpath:test-application.properties")
+@DataJdbcTest(useDefaultFilters = false)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({PostServiceImpl.class, CommentServiceImpl.class, ImageServiceImpl.class,
+        PostFeedRepository.class, PostTagRepository.class, PostLikesRepository.class, PostImageRepository.class})
 @Sql(scripts = {"classpath:schema-h2.sql", "classpath:data-h2.sql"},
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 class PostTagRepositoryIntegrationTest {

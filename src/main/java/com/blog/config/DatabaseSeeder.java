@@ -31,9 +31,15 @@ public class DatabaseSeeder {
 
     @PostConstruct
     public void initialize() {
+        if (!seedDatabase) {
+            log.info("Database initialization disabled (app.seed-database=false): schema and demo data are left untouched.");
+            return;
+        }
+
+        log.info("Applying database schema...");
         DatabasePopulatorUtils.execute(new ResourceDatabasePopulator(new ClassPathResource("schema.sql")), dataSource);
 
-        if (seedDatabase && postRepository.count() == 0) {
+        if (postRepository.count() == 0) {
             log.info("Seeding demo data into the database...");
             DatabasePopulatorUtils.execute(new ResourceDatabasePopulator(new ClassPathResource("data.sql")), dataSource);
         }

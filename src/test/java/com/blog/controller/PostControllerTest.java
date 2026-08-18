@@ -11,16 +11,14 @@ import com.blog.exception.ResourceNotFoundException;
 import com.blog.service.CommentService;
 import com.blog.service.ImageService;
 import com.blog.service.PostService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -38,27 +36,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringJUnitWebConfig(MvcTestConfig.class)
+@WebMvcTest(controllers = PostController.class,
+        properties = {"spring.mvc.throw-exception-if-no-handler-found=true",
+                "spring.web.resources.add-mappings=false"})
 class PostControllerTest {
 
     @Autowired
-    private PostService postService;
-
-    @Autowired
-    private CommentService commentService;
-
-    @Autowired
-    private ImageService imageService;
-
-    @Autowired
-    private WebApplicationContext context;
-
     private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-    }
+    @MockitoBean
+    private PostService postService;
+
+    @MockitoBean
+    private CommentService commentService;
+
+    @MockitoBean
+    private ImageService imageService;
 
     @Test
     void getPostsReturnsFeedJson() throws Exception {
@@ -148,12 +141,7 @@ class PostControllerTest {
 
     @Test
     void unknownPathReturns404Json() throws Exception {
-        MockMvc strictMvc = MockMvcBuilders.webAppContextSetup(context)
-                .addDispatcherServletCustomizer(
-                        dispatcherServlet -> dispatcherServlet.setThrowExceptionIfNoHandlerFound(true))
-                .build();
-
-        strictMvc.perform(get("/api/nonexistent"))
+        mockMvc.perform(get("/api/nonexistent"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value("404"))

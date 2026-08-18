@@ -1,13 +1,16 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM gradle:8.14-jdk21 AS build
 WORKDIR /app
 
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
+# Warm the Gradle cache with the build scripts before copying sources
+COPY settings.gradle build.gradle gradlew gradlew.bat ./
+COPY gradle ./gradle
+RUN ./gradlew dependencies --no-daemon
 
 COPY src ./src
-RUN mvn -B package
+RUN ./gradlew build --no-daemon
 
-FROM tomcat:10.1-jre21
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
-COPY --from=build /app/target/blog-backend.war /usr/local/tomcat/webapps/ROOT.war
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/build/libs/blog-backend.jar /app/blog-backend.jar
 EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/blog-backend.jar"]
